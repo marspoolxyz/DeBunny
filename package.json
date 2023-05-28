@@ -2,7 +2,12 @@
   "name": "ext_v2",
   "version": "0.1.0",
   "description": "Internet Computer starter application",
-  "keywords": ["Internet Computer", "Motoko", "JavaScript", "Canister"],
+  "keywords": [
+    "Internet Computer",
+    "Motoko",
+    "JavaScript",
+    "Canister"
+  ],
   "scripts": {
     "build": "webpack",
     "prebuild": "npm run copy:types",
@@ -63,6 +68,7 @@
   ],
   "dependencies": {
     "compress-images": "^2.0.4",
+    "csv": "^6.3.1",
     "dotenv": "^16.0.2",
     "esm-wallaby": "^3.2.26",
     "fs": "^0.0.1-security",

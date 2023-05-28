@@ -24,6 +24,15 @@ global.fetch = fetch;
 const bip39 = require('bip39')
 const mime = require('mime');
 
+const csvFile = require("fs");
+const { parse } = require("csv-parse");
+var accountIDs = [];
+var arrayIndex = 0;
+var fileAccountIDs = [];
+
+
+
+
 const Ed25519KeyIdentity = require("@dfinity/identity").Ed25519KeyIdentity;
 const HttpAgent = require("@dfinity/agent").HttpAgent;
 const Actor = require("@dfinity/agent").Actor;
@@ -111,7 +120,37 @@ const removeFilenameExtension = (filename) => {
   return filename.split('.').slice(0, -1).join('.');
 };
 
+
+
+
+
+async function getAccountFromFile() {
+
+  csvFile.createReadStream("./src/Airdrop.csv")
+  .pipe(parse({ delimiter: ",", from_line: 1 }))
+  .on("data", function (row) {
+    accountIDs.push(row);    
+    //console.log(accountIDs[arrayIndex]);
+    console.log('accountIDs.push("'+row+'");');
+    arrayIndex++;
+  })
+  .on("end", function () {
+    console.log("finished "+arrayIndex);
+  })
+  .on("error", function (error) {
+    console.log(error.message);
+  });
+  return accountIDs;
+}
+
+
 (async () => {
+
+
+          //Create Array as Text to use
+          fileAccountIDs = await getAccountFromFile()
+
+
 
           // first we create required asset canisters - usually we use 800mb per asset canister, so for a collection of 1.5gb worth of assets this would be 2 asset canisters
           //await API.ext_addAssetCanister();
@@ -119,8 +158,15 @@ const removeFilenameExtension = (filename) => {
           //await API.ext_addAssetCanister();
 
           //loop through all assets, and call upload asset
-          var collLen = 5;
-          var alreadyMinted = 0
+          var arrayCount = 0;
+
+          console.log("TEST " + accountIDs[arrayCount]);
+
+          var alreadyMinted = 683;
+          var currentArraySize = 683;
+
+          var collLen = currentArraySize + alreadyMinted; //(Alreadyminted + Array Size)
+          
           var i = -1 + alreadyMinted;
           var toMint = [];
           while (++i < collLen)
@@ -134,12 +180,12 @@ const removeFilenameExtension = (filename) => {
             //await uploadAsset(true, API, ahThumb, filename, thumb)  // upload thumbnail            
             //await uploadAsset(false, API, ahAsset, filename, asset); // upload image
 
-            console.log("Currently in " + i);
-
+            console.log("Currently in " + i + " Account ID :" + accountIDs[arrayCount]);
+            
 
             // add asset handlers to toMint array
             toMint.push([
-              "a5a9dce51088dc4584342667844fb29cd120020274a95f3329026693375a78b0",
+              accountIDs[arrayCount],
               {
                 nonfungible : {
                   name : ""+i+"_front",
@@ -150,11 +196,12 @@ const removeFilenameExtension = (filename) => {
               }
               
             ])
+            arrayCount++;
+          }        
 
-          }
 
           // mint in the end
-          await API.ext_mint(toMint);
+         // await API.ext_mint(toMint);
 
         })();
 
